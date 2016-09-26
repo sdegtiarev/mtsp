@@ -48,12 +48,13 @@ public:
 	: _imp{new _counted(arg...)}
 	{}
 
-	~shared_ptr() =default;
+	~shared_ptr() { delete _imp; }
 
 	T& operator*() { return *_imp._ptr; }
 	T const& operator*() const { return *_imp._ptr; }
 	T* operator->() { return _imp._ptr; }
 	T const* operator->() const { return _imp._ptr; }
+
 
 	shared_ptr(shared_ptr const& x)
 	: _imp(x._imp.dup())
