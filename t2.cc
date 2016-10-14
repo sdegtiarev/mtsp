@@ -1,3 +1,5 @@
+// unsafe version, dumps core
+// using copy ctor
 #include <thread>
 #include <memory>
 #include <iostream>

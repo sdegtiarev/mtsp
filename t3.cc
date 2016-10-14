@@ -1,3 +1,5 @@
+// safe version, loops forever
+// using atomic operations
 #include <thread>
 #include <memory>
 #include <iostream>
