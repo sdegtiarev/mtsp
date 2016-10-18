@@ -8,7 +8,7 @@ LDFLAGS=
 LDLIBS= -lpthread 
 
 
-all: t1 t2 t3
+all: t1 t2 t3 t4
 
 clean:
 	@rm -f t1 t2 t3 *.o core

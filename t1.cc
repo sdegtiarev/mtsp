@@ -11,7 +11,7 @@ void inc() {
 		auto sp=map;
 }
 
-int main(int argc, char**argv)
+int main()
 {
 	std::thread(inc).detach();
 	for(;;)
