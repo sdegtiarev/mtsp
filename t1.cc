@@ -4,18 +4,17 @@
 #include <memory>
 #include <iostream>
 
-auto map=std::make_shared<int>(0);
+auto data=std::make_shared<int>(0);
 
-void inc() {
+void read_data() {
 	for(;;)
-		auto sp=map;
+		auto sp=data;
 }
 
 int main()
 {
-	std::thread(inc).detach();
+	std::thread(read_data).detach();
 	for(;;)
-		map=std::make_shared<int>(0);
+		data=std::make_shared<int>(0);
 	return 0;
 }
-

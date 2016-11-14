@@ -3,24 +3,22 @@
 #include <thread>
 #include <memory>
 #include <iostream>
+#include <assert.h>
 
-auto map=std::make_shared<int>(0);
+auto data=std::make_shared<int>(0);
 
-void inc() {
+void read_data() {
 	for(;;)
-		auto sp=std::atomic_load(&map);
+		auto sp=std::atomic_load(&data);
 }
 
 int main(int argc, char**argv)
 {
-if(std::atomic_is_lock_free(&map))
-	std::cout<<"std::shared_ptr is lock free"<<std::endl;
-else
-	std::cout<<"std::shared_ptr is NOT lock free"<<std::endl;
-
-	std::thread(inc).detach();
-	for(;;)
-		std::atomic_exchange(&map, std::make_shared<int>(0));
+	std::thread(read_data).detach();
+	for(;;) {
+		std::atomic_exchange(&data, std::make_shared<int>(0));
+		assert(std::atomic_is_lock_free(&data));
+	}
 	return 0;
 }
 
