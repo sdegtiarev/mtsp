@@ -10,7 +10,7 @@ template<typename T>
 struct __shared
 {
 public:
-	__shared() : __shared_count(0) {}
+	__shared() : __shared_count(1) {}
 	size_t __shared_count;
 	char __data[sizeof(T)];
 };
@@ -23,9 +23,9 @@ class shared_ptr
 {
 public:
 
-	T* get() { return reinterpret_cast<T*>(_impl->__data); }
-	T* operator->() { return get(); }
+	T* get() { return reinterpret_cast<T*>(_impl.load()->__data); }
 	T& operator*() { return *get(); }
+	T* operator->() { return get(); }
 
 	template<typename...Args>
 	shared_ptr(Args...args)
@@ -33,7 +33,6 @@ public:
 	{
 		//new (get()) T(std::forward(args)...);
 		new (get()) T(args...);
-		++_impl->__shared_count;
 	}
 
 	~shared_ptr()
@@ -44,22 +43,57 @@ public:
 		_impl=t;
 	}
 
-	shared_ptr(const shared_ptr& r)
+	shared_ptr(shared_ptr& r)
 	: _impl{r.lock()}
 	{
-		++_impl->__shared_count;
-		r._impl=_impl;
+		++_impl.load()->__shared_count;
+		r._impl.exchange(_impl);
+	}
+
+
+	shared_ptr(shared_ptr&& r)
+	: _impl{new impl::__shared<T>}
+	{
+		_impl=r._impl.exchange(_impl);
+	}
+
+	shared_ptr& operator=(shared_ptr& r)
+	{
+		auto t=lock();
+		if(--t->__shared_count == 0)
+			delete t;
+
+		t=r.lock();
+		++t->__shared_count;
+		_impl=t;
+		r._impl.exchange(_impl);
+
+		return *this;
+	}
+
+	shared_ptr& operator=(shared_ptr&& r)
+	{
+		auto t=lock();
+		if(--t->__shared_count == 0)
+			delete t;
+
+		t=r.lock();
+		++t->__shared_count;
+		_impl=t;
+		r._impl.exchange(_impl);
+
+		return *this;
 	}
 
 
 private:
-	mutable impl::__shared<T>* _impl;
+	std::atomic<impl::__shared<T>*> _impl;
 
-	impl::__shared<T>* lock() const
+	impl::__shared<T>* lock()
 	{
 		impl::__shared<T>* t=nullptr;
 		while(t == nullptr)
-			t=std::atomic_exchange(&_impl, t);
+			t=_impl.exchange(t);
 		return t;
 	}
 

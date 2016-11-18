@@ -4,7 +4,7 @@
 # CXX= g++
 CXX= g++-5
 # CXX= g++-6
-CXXFLAGS= -g  -std=c++11
+CXXFLAGS= -g  -std=c++11 
 LDFLAGS= 
 LDLIBS= -lpthread 
 
